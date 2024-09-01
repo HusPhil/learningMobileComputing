@@ -10,6 +10,10 @@ import android.widget.ImageButton;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.husph.mymemory.models.BoardSize;
+
+import java.util.List;
+
 public class MemoryBoardAdapter extends RecyclerView.Adapter<MemoryBoardAdapter.ViewHolder> {
 
     static final int NUM_OF_ELEMENTS_IN_GRID = 8;
@@ -18,20 +22,22 @@ public class MemoryBoardAdapter extends RecyclerView.Adapter<MemoryBoardAdapter.
     static final String TAG = "MemoryBoardAdapter";
 
     private final Context context;
-    private final int numOfElementsInGrid;
+    private final BoardSize boardSize;
+    protected final List<Integer> cardImages;
 
 
-    public MemoryBoardAdapter(Context context, int numOfElementsInGrid) {
+    public MemoryBoardAdapter(Context context, BoardSize boardSize, List<Integer> cardImages) {
         this.context = context;
-        this.numOfElementsInGrid = numOfElementsInGrid;
+        this.boardSize = boardSize;
+        this.cardImages = cardImages;
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
-        final int cardHeight = parent.getHeight()/(NUM_OF_ELEMENTS_IN_GRID/NUM_OF_COLUMNS_IN_GRID);
-        final int cardWidth = parent.getWidth()/(NUM_OF_COLUMNS_IN_GRID);
+        final int cardWidth = parent.getWidth() / boardSize.getCardWidth();
+        final int cardHeight = parent.getHeight() / boardSize.getCardHeight();
         final int cardSideLength = Math.min(cardWidth, cardHeight) - (2 * MARGIN_SIZE);
 
         View itemView = LayoutInflater.from(context)
@@ -49,12 +55,12 @@ public class MemoryBoardAdapter extends RecyclerView.Adapter<MemoryBoardAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.bind(position);
+        holder.bind(position, cardImages);
     }
 
     @Override
     public int getItemCount() {
-        return numOfElementsInGrid;
+        return boardSize.getNumOfCards();
     }
 
 
@@ -65,8 +71,8 @@ public class MemoryBoardAdapter extends RecyclerView.Adapter<MemoryBoardAdapter.
 
         private final ImageButton imageButton = itemView.findViewById(R.id.imageButton);
 
-        void bind(int position) {
-            //no-op
+        void bind(int position, List<Integer> cardImages) {
+            imageButton.setImageResource(cardImages.get(position));
             imageButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {

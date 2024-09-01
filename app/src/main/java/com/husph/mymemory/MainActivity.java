@@ -11,15 +11,21 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.husph.mymemory.models.BoardSize;
+import com.husph.mymemory.utils.Constants;
+
+import java.util.Collections;
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity {
 
-    private final int NUM_OF_ELEMENTS_IN_GRID = 8;
-    private final int NUM_OF_COLUMNS_IN_GRID = 2;
+    private BoardSize boardSize = BoardSize.MEDIUM;
 
     private RecyclerView rvBoard;
     private TextView tvNumMoves;
     private TextView tvNumPairs;
 
+    public List<Integer> cardImages = Constants.getShuffledImages(boardSize.getCardPairs());
 
 
     @Override
@@ -39,9 +45,9 @@ public class MainActivity extends AppCompatActivity {
         tvNumPairs = findViewById(R.id.tvNumPairs);
 
         //setting up the recycler view
-        rvBoard.setAdapter(new MemoryBoardAdapter(this, NUM_OF_ELEMENTS_IN_GRID));
+        rvBoard.setAdapter(new MemoryBoardAdapter(this, boardSize, cardImages));
         rvBoard.setHasFixedSize(true);
-        rvBoard.setLayoutManager(new GridLayoutManager(this, NUM_OF_COLUMNS_IN_GRID));
+        rvBoard.setLayoutManager(new GridLayoutManager(this, boardSize.getCardWidth()));
     }
 
 
