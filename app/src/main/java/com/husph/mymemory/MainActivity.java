@@ -1,13 +1,17 @@
 package com.husph.mymemory;
 
-import android.annotation.SuppressLint;
+import android.animation.ArgbEvaluator;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -46,6 +50,62 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        setUpBoard();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if(item.getItemId() == R.id.mi_refresh) {
+            setUpBoard();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void updateGameWithFlip(int position) {
+        if(memoryGame.haveWonGame()) {
+            Snackbar.make(clRoot, "You have found all the pairs!", Snackbar.LENGTH_LONG)
+                    .show();
+            return;
+        }
+
+        if(memoryGame.getCards().get(position).getIsFaceUp()) {
+            Snackbar.make(clRoot, "Invalid move!", Snackbar.LENGTH_LONG)
+                    .show();
+            return;
+        }
+
+        final boolean matchFound = memoryGame.flipCard(position, memoryBoardAdapter);
+        memoryBoardAdapter.notifyItemChanged(position);
+
+        final String numMoveText = "Moves: " + memoryGame.getNumMoves();
+        tvNumMoves.setText(numMoveText);
+
+        if(!matchFound) {
+            return;
+        }
+
+        int color = (int) new ArgbEvaluator().evaluate(
+                (float) memoryGame.getNumOfPairsFound() / boardSize.getCardPairs(),
+                ContextCompat.getColor(this, R.color.c_progress_none),
+                ContextCompat.getColor(this, R.color.c_progress_full)
+        );
+
+        tvNumPairs.setTextColor(color);
+        String numPairsText = "Pairs: " + memoryGame.getNumOfPairsFound() + "/" + boardSize.getCardPairs();
+        tvNumPairs.setText(numPairsText);
+        if(memoryGame.haveWonGame()) {
+            Snackbar.make(clRoot, "Congratulation! You won the game!", Snackbar.LENGTH_LONG)
+                    .show();
+        }
+    }
+
+    private void setUpBoard() {
         //access the references of the views that need to change
         rvBoard = findViewById(R.id.rvBoard);
         tvNumMoves = findViewById(R.id.tvNumMove);
@@ -54,12 +114,16 @@ public class MainActivity extends AppCompatActivity {
         //setting up memory game class
         memoryGame = new MemoryGame(boardSize);
 
-        MemoryBoardAdapter.CardClickListener cardClickListener = new MemoryBoardAdapter.CardClickListener() {
-            @Override
-            public void onCardClick(int position) {
-                Log.i(TAG, "Click detected in " + TAG);
-                updateGameWithFlip(position);
-            }
+        final String numMovesText = "Moves: " + memoryGame.getNumMoves();
+        final String numPairsText = "Pairs: " + memoryGame.getNumOfPairsFound() + "/" + boardSize.getCardPairs();
+
+        tvNumMoves.setText(numMovesText);
+        tvNumPairs.setTextColor(ContextCompat.getColor(this, R.color.c_progress_none));
+        tvNumPairs.setText(numPairsText);
+
+        MemoryBoardAdapter.CardClickListener cardClickListener = position -> {
+            Log.i(TAG, "Click detected in " + TAG);
+            updateGameWithFlip(position);
         };
 
         memoryBoardAdapter = new MemoryBoardAdapter(
@@ -73,24 +137,4 @@ public class MainActivity extends AppCompatActivity {
         rvBoard.setHasFixedSize(true);
         rvBoard.setLayoutManager(new GridLayoutManager(this, boardSize.getCardWidth()));
     }
-
-    @SuppressLint("NotifyDataSetChanged")
-    private void updateGameWithFlip(int position) {
-        if(memoryGame.getNumOfPairsFound() == boardSize.getCardPairs()) {
-            Snackbar.make(clRoot, "You have found all the pairs!", Snackbar.LENGTH_LONG)
-                    .show();
-            return;
-        }
-
-        if(memoryGame.getCards().get(position).getIsFaceUp()) {
-            Snackbar.make(clRoot, "Invalid move!", Snackbar.LENGTH_LONG)
-                    .show();
-            return;
-        }
-
-        memoryGame.flipCard(position);
-        memoryBoardAdapter.notifyDataSetChanged();
-    }
-
-
 }

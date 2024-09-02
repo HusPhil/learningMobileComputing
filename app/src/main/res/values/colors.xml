@@ -2,4 +2,6 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="c_progress_none">#811F18</color>
+    <color name="c_progress_full">#126305</color>
 </resources>

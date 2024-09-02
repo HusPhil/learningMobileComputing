@@ -1,7 +1,6 @@
 package com.husph.mymemory.models;
 
-import android.util.Log;
-
+import com.husph.mymemory.MemoryBoardAdapter;
 import com.husph.mymemory.utils.Constants;
 
 import java.util.ArrayList;
@@ -15,10 +14,11 @@ public class MemoryGame {
     private static final String TAG = "MemoryGame";
 
     private final BoardSize boardSize;
-    private List<MemoryCard> cards;
+    private final List<MemoryCard> cards;
 
     private int prevSelectedCardPosition = NONE_SELECTED;
-    private int numOfPairsFound;
+    private int numOfPairsFound = 0;
+    private int numOfValidMoves = 0;
 
     public MemoryGame(BoardSize boardSize) {
         this.boardSize = boardSize;
@@ -46,27 +46,32 @@ public class MemoryGame {
         return numOfPairsFound;
     }
 
-    public void flipCard(int position) {
+    public boolean flipCard(int position, MemoryBoardAdapter memoryBoardAdapter) {
         MemoryCard card = cards.get(position);
 
-        if (card.getIsMatched() || position == prevSelectedCardPosition) return;
+        if (card.getIsMatched() || position == prevSelectedCardPosition) return false;
+        numOfValidMoves++;
+
+        boolean matchFound = false;
 
         if (prevSelectedCardPosition == NONE_SELECTED) {
-            restoreCards();
+            restoreCards(memoryBoardAdapter);
             card.setIsFaceUp(true);
             prevSelectedCardPosition = position;
         } else {
             card.setIsFaceUp(true);
-            boolean matchFound = checkIsMatch(prevSelectedCardPosition, position);
+            matchFound = checkIsMatch(prevSelectedCardPosition, position, memoryBoardAdapter);
             prevSelectedCardPosition = NONE_SELECTED;
 
             if (matchFound) {
                 numOfPairsFound++;
             }
         }
+
+        return matchFound;
     }
 
-    private boolean checkIsMatch(int prevSelectedCardPosition, int newSelectedCardPosition) {
+    private boolean checkIsMatch(int prevSelectedCardPosition, int newSelectedCardPosition, MemoryBoardAdapter memoryBoardAdapter) {
 
         MemoryCard prevSelectedCard, newSelectedCard;
         prevSelectedCard = cards.get(prevSelectedCardPosition);
@@ -75,17 +80,30 @@ public class MemoryGame {
         if(prevSelectedCard.getIdentifier() == newSelectedCard.getIdentifier()) {
             prevSelectedCard.setIsMatched(true);
             newSelectedCard.setIsMatched(true);
+
+            memoryBoardAdapter.notifyItemChanged(prevSelectedCardPosition);
+            memoryBoardAdapter.notifyItemChanged(newSelectedCardPosition);
+
             return true;
         }
         return false;
     }
 
-    private void restoreCards() {
-        for (MemoryCard card : cards) {
-            if (!card.getIsMatched()) {
+    private void restoreCards(MemoryBoardAdapter memoryBoardAdapter) {
+        for (int i = 0; i < cards.size(); i++) {
+            MemoryCard card = cards.get(i);
+            if (!card.getIsMatched() && card.getIsFaceUp()) {
                 card.setIsFaceUp(false);
+                memoryBoardAdapter.notifyItemChanged(i);
             }
         }
     }
 
+    public int getNumMoves() {
+        return numOfValidMoves / 2;
+    }
+
+    public boolean haveWonGame() {
+        return numOfPairsFound == boardSize.getCardPairs();
+    }
 }
