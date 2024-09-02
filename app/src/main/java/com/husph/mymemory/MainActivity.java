@@ -12,6 +12,8 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.husph.mymemory.models.BoardSize;
+import com.husph.mymemory.models.MemoryCard;
+import com.husph.mymemory.models.MemoryGame;
 import com.husph.mymemory.utils.Constants;
 
 import java.util.Collections;
@@ -20,13 +22,13 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     private BoardSize boardSize = BoardSize.MEDIUM;
+    private MemoryGame memoryGame = new MemoryGame(boardSize);
 
     private RecyclerView rvBoard;
     private TextView tvNumMoves;
     private TextView tvNumPairs;
 
-    public List<Integer> cardImages = Constants.getShuffledImages(boardSize.getCardPairs());
-
+    public List<MemoryCard> cards = memoryGame.getCards();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
         tvNumPairs = findViewById(R.id.tvNumPairs);
 
         //setting up the recycler view
-        rvBoard.setAdapter(new MemoryBoardAdapter(this, boardSize, cardImages));
+        rvBoard.setAdapter(new MemoryBoardAdapter(this, boardSize, cards));
         rvBoard.setHasFixedSize(true);
         rvBoard.setLayoutManager(new GridLayoutManager(this, boardSize.getCardWidth()));
     }

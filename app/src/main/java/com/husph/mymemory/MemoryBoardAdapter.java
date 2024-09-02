@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.husph.mymemory.models.BoardSize;
+import com.husph.mymemory.models.MemoryCard;
 
 import java.util.List;
 
@@ -23,13 +24,13 @@ public class MemoryBoardAdapter extends RecyclerView.Adapter<MemoryBoardAdapter.
 
     private final Context context;
     private final BoardSize boardSize;
-    protected final List<Integer> cardImages;
+    protected final List<MemoryCard> cards;
 
 
-    public MemoryBoardAdapter(Context context, BoardSize boardSize, List<Integer> cardImages) {
+    public MemoryBoardAdapter(Context context, BoardSize boardSize, List<MemoryCard> cards) {
         this.context = context;
         this.boardSize = boardSize;
-        this.cardImages = cardImages;
+        this.cards = cards;
     }
 
     @NonNull
@@ -55,7 +56,7 @@ public class MemoryBoardAdapter extends RecyclerView.Adapter<MemoryBoardAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.bind(position, cardImages);
+        holder.bind(position, cards);
     }
 
     @Override
@@ -71,8 +72,8 @@ public class MemoryBoardAdapter extends RecyclerView.Adapter<MemoryBoardAdapter.
 
         private final ImageButton imageButton = itemView.findViewById(R.id.imageButton);
 
-        void bind(int position, List<Integer> cardImages) {
-            imageButton.setImageResource(cardImages.get(position));
+        void bind(int position, List<MemoryCard> cards) {
+            imageButton.setImageResource(cards.get(position).getIdentifier());
             imageButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {

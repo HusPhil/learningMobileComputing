@@ -23,18 +23,4 @@ public class Constants {
             R.drawable.ic_star,
             R.drawable.ic_work
     );
-
-    public static List<Integer> getShuffledImages(int numOfPairs) {
-        List<Integer> shuffledImages = new ArrayList<>(DEFAULT_ICONS);
-        Collections.shuffle(shuffledImages);
-
-        List<Integer> takenImages =  shuffledImages.subList(0, Math.min(shuffledImages.size(), numOfPairs));
-
-        List<Integer> randomizedImages = new ArrayList<>(takenImages);
-        randomizedImages.addAll(takenImages);
-        Collections.shuffle((randomizedImages));
-
-        return randomizedImages;
-    }
-
 }
