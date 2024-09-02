@@ -4,18 +4,18 @@ public class MemoryCard {
 
 
     private final int identifier;
-    private int isFaceUp;
+    private boolean isFaceUp;
     private boolean isMatched;
 
     public int getIdentifier() {
         return identifier;
     }
 
-    public int getIsFaceUp() {
+    public boolean getIsFaceUp() {
         return isFaceUp;
     }
 
-    public void setIsFaceUp(int isFaceUp) {
+    public void setIsFaceUp(boolean isFaceUp) {
         this.isFaceUp = isFaceUp;
     }
 

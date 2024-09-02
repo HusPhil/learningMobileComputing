@@ -25,12 +25,17 @@ public class MemoryBoardAdapter extends RecyclerView.Adapter<MemoryBoardAdapter.
     private final Context context;
     private final BoardSize boardSize;
     protected final List<MemoryCard> cards;
+    protected final CardClickListener cardClickListener;
 
 
-    public MemoryBoardAdapter(Context context, BoardSize boardSize, List<MemoryCard> cards) {
+    public MemoryBoardAdapter(
+        Context context, BoardSize boardSize,
+        List<MemoryCard> cards, CardClickListener cardClickListener
+    ) {
         this.context = context;
         this.boardSize = boardSize;
         this.cards = cards;
+        this.cardClickListener = cardClickListener;
     }
 
     @NonNull
@@ -56,7 +61,7 @@ public class MemoryBoardAdapter extends RecyclerView.Adapter<MemoryBoardAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.bind(position, cards);
+        holder.bind(position, cards, cardClickListener);
     }
 
     @Override
@@ -64,22 +69,27 @@ public class MemoryBoardAdapter extends RecyclerView.Adapter<MemoryBoardAdapter.
         return boardSize.getNumOfCards();
     }
 
-
     static class ViewHolder extends RecyclerView.ViewHolder {
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
         }
 
         private final ImageButton imageButton = itemView.findViewById(R.id.imageButton);
+        void bind(int position, List<MemoryCard> cards, CardClickListener cardClickListener) {
 
-        void bind(int position, List<MemoryCard> cards) {
-            imageButton.setImageResource(cards.get(position).getIdentifier());
+            final MemoryCard memoryCard = cards.get(position);
+            imageButton.setImageResource(memoryCard.getIsFaceUp() ? memoryCard.getIdentifier() : R.drawable.ic_launcher_background);
             imageButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     Log.i(TAG, "Clicked item as pos: " + position);
+                    cardClickListener.onCardClick(position);
                 }
             });
         }
+    }
+
+    static interface CardClickListener {
+        void onCardClick(int position);
     }
 }

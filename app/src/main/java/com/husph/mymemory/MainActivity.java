@@ -1,6 +1,7 @@
 package com.husph.mymemory;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -12,23 +13,19 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.husph.mymemory.models.BoardSize;
-import com.husph.mymemory.models.MemoryCard;
 import com.husph.mymemory.models.MemoryGame;
-import com.husph.mymemory.utils.Constants;
-
-import java.util.Collections;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private BoardSize boardSize = BoardSize.MEDIUM;
-    private MemoryGame memoryGame = new MemoryGame(boardSize);
+    private static final String TAG = "MainActivity";
+
+    private final BoardSize boardSize = BoardSize.MEDIUM;
+    private MemoryGame memoryGame;
+    private MemoryBoardAdapter memoryBoardAdapter;
 
     private RecyclerView rvBoard;
     private TextView tvNumMoves;
     private TextView tvNumPairs;
-
-    public List<MemoryCard> cards = memoryGame.getCards();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,8 +43,23 @@ public class MainActivity extends AppCompatActivity {
         tvNumMoves = findViewById(R.id.tvNumMove);
         tvNumPairs = findViewById(R.id.tvNumPairs);
 
+        //setting up memory game class
+        memoryGame = new MemoryGame(boardSize);
+
+        MemoryBoardAdapter.CardClickListener onCardClick = (position) -> {
+            Log.i(TAG, "Click detected in " + TAG);
+            Log.i(TAG, "Another thing we need to flip at " + position);
+
+        };
+
+        memoryBoardAdapter = new MemoryBoardAdapter(
+                this, boardSize,
+                memoryGame.getCards(),
+                onCardClick
+        );
+
         //setting up the recycler view
-        rvBoard.setAdapter(new MemoryBoardAdapter(this, boardSize, cards));
+        rvBoard.setAdapter(memoryBoardAdapter);
         rvBoard.setHasFixedSize(true);
         rvBoard.setLayoutManager(new GridLayoutManager(this, boardSize.getCardWidth()));
     }
