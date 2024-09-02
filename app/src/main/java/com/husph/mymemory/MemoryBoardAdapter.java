@@ -1,7 +1,6 @@
 package com.husph.mymemory;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,21 +16,14 @@ import java.util.List;
 
 public class MemoryBoardAdapter extends RecyclerView.Adapter<MemoryBoardAdapter.ViewHolder> {
 
-    static final int NUM_OF_ELEMENTS_IN_GRID = 8;
-    static final int NUM_OF_COLUMNS_IN_GRID = 2;
-    static final int MARGIN_SIZE = 10;
-    static final String TAG = "MemoryBoardAdapter";
+    private static final int MARGIN_SIZE = 10;
 
     private final Context context;
     private final BoardSize boardSize;
-    protected final List<MemoryCard> cards;
-    protected final CardClickListener cardClickListener;
+    private final List<MemoryCard> cards;
+    private final CardClickListener cardClickListener;
 
-
-    public MemoryBoardAdapter(
-        Context context, BoardSize boardSize,
-        List<MemoryCard> cards, CardClickListener cardClickListener
-    ) {
+    public MemoryBoardAdapter(Context context, BoardSize boardSize, List<MemoryCard> cards, CardClickListener cardClickListener) {
         this.context = context;
         this.boardSize = boardSize;
         this.cards = cards;
@@ -41,7 +33,6 @@ public class MemoryBoardAdapter extends RecyclerView.Adapter<MemoryBoardAdapter.
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-
         final int cardWidth = parent.getWidth() / boardSize.getCardWidth();
         final int cardHeight = parent.getHeight() / boardSize.getCardHeight();
         final int cardSideLength = Math.min(cardWidth, cardHeight) - (2 * MARGIN_SIZE);
@@ -56,12 +47,12 @@ public class MemoryBoardAdapter extends RecyclerView.Adapter<MemoryBoardAdapter.
         layoutParams.width = cardSideLength;
         layoutParams.setMargins(MARGIN_SIZE, MARGIN_SIZE, MARGIN_SIZE, MARGIN_SIZE);
 
-        return new ViewHolder(itemView);
+        return new ViewHolder(itemView, cardClickListener);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.bind(position, cards, cardClickListener);
+        holder.bind(cards.get(position));
     }
 
     @Override
@@ -70,26 +61,21 @@ public class MemoryBoardAdapter extends RecyclerView.Adapter<MemoryBoardAdapter.
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        public ViewHolder(@NonNull View itemView) {
+        private final ImageButton imageButton;
+
+        ViewHolder(@NonNull View itemView, final CardClickListener cardClickListener) {
             super(itemView);
+            imageButton = itemView.findViewById(R.id.imageButton);
+            imageButton.setOnClickListener(view -> cardClickListener.onCardClick(getAdapterPosition()));
         }
 
-        private final ImageButton imageButton = itemView.findViewById(R.id.imageButton);
-        void bind(int position, List<MemoryCard> cards, CardClickListener cardClickListener) {
-
-            final MemoryCard memoryCard = cards.get(position);
+        void bind(MemoryCard memoryCard) {
             imageButton.setImageResource(memoryCard.getIsFaceUp() ? memoryCard.getIdentifier() : R.drawable.ic_launcher_background);
-            imageButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Log.i(TAG, "Clicked item as pos: " + position);
-                    cardClickListener.onCardClick(position);
-                }
-            });
+            imageButton.setAlpha(memoryCard.getIsMatched() ? 0.4f : 1.0f);
         }
     }
 
-    static interface CardClickListener {
+    public interface CardClickListener {
         void onCardClick(int position);
     }
 }

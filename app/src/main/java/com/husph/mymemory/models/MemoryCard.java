@@ -19,11 +19,11 @@ public class MemoryCard {
         this.isFaceUp = isFaceUp;
     }
 
-    public boolean isMatched() {
+    public boolean getIsMatched() {
         return isMatched;
     }
 
-    public void setMatched(boolean matched) {
+    public void setIsMatched(boolean matched) {
         isMatched = matched;
     }
 

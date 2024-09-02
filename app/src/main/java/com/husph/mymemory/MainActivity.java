@@ -1,17 +1,20 @@
 package com.husph.mymemory;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.husph.mymemory.models.BoardSize;
 import com.husph.mymemory.models.MemoryGame;
 
@@ -19,7 +22,9 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
 
-    private final BoardSize boardSize = BoardSize.MEDIUM;
+    private final BoardSize boardSize = BoardSize.HARD;
+
+    private ConstraintLayout clRoot;
     private MemoryGame memoryGame;
     private MemoryBoardAdapter memoryBoardAdapter;
 
@@ -32,7 +37,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+
+        clRoot = findViewById(R.id.clRoot);
+
+        ViewCompat.setOnApplyWindowInsetsListener(clRoot, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
@@ -46,16 +54,18 @@ public class MainActivity extends AppCompatActivity {
         //setting up memory game class
         memoryGame = new MemoryGame(boardSize);
 
-        MemoryBoardAdapter.CardClickListener onCardClick = (position) -> {
-            Log.i(TAG, "Click detected in " + TAG);
-            Log.i(TAG, "Another thing we need to flip at " + position);
-
+        MemoryBoardAdapter.CardClickListener cardClickListener = new MemoryBoardAdapter.CardClickListener() {
+            @Override
+            public void onCardClick(int position) {
+                Log.i(TAG, "Click detected in " + TAG);
+                updateGameWithFlip(position);
+            }
         };
 
         memoryBoardAdapter = new MemoryBoardAdapter(
                 this, boardSize,
                 memoryGame.getCards(),
-                onCardClick
+                cardClickListener
         );
 
         //setting up the recycler view
@@ -64,6 +74,23 @@ public class MainActivity extends AppCompatActivity {
         rvBoard.setLayoutManager(new GridLayoutManager(this, boardSize.getCardWidth()));
     }
 
+    @SuppressLint("NotifyDataSetChanged")
+    private void updateGameWithFlip(int position) {
+        if(memoryGame.getNumOfPairsFound() == boardSize.getCardPairs()) {
+            Snackbar.make(clRoot, "You have found all the pairs!", Snackbar.LENGTH_LONG)
+                    .show();
+            return;
+        }
+
+        if(memoryGame.getCards().get(position).getIsFaceUp()) {
+            Snackbar.make(clRoot, "Invalid move!", Snackbar.LENGTH_LONG)
+                    .show();
+            return;
+        }
+
+        memoryGame.flipCard(position);
+        memoryBoardAdapter.notifyDataSetChanged();
+    }
 
 
 }
